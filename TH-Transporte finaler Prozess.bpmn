@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" id="Definitions_1iw2844" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="2.2.3">
+  <bpmn:collaboration id="Collaboration_0yhoahg">
+    <bpmn:participant id="Participant_0jtecfm" name="TH Transporte" processRef="TH-Transporte" />
+    <bpmn:participant id="Participant_09hns3e" name="Kunde" />
+    <bpmn:messageFlow id="MessageFlow_1fpdncz" sourceRef="Participant_09hns3e" targetRef="StartEvent_1" />
+    <bpmn:messageFlow id="MessageFlow_1v9cbb7" sourceRef="Task_14mr355" targetRef="Participant_09hns3e" />
+  </bpmn:collaboration>
+  <bpmn:process id="TH-Transporte" isExecutable="true">
+    <bpmn:startEvent id="StartEvent_1" name="Auftrag eingegangen">
+      <bpmn:outgoing>SequenceFlow_1n6fdtl</bpmn:outgoing>
+      <bpmn:messageEventDefinition messageRef="Message_15lo3sw" />
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="SequenceFlow_1n6fdtl" sourceRef="StartEvent_1" targetRef="Task_16icuop" />
+    <bpmn:sequenceFlow id="SequenceFlow_12mssqd" sourceRef="Task_16icuop" targetRef="Task_01rjk2k" />
+    <bpmn:businessRuleTask id="Task_01rjk2k" name="Zusatzgebuehr ermitteln" camunda:resultVariable="zusatzgebuehr" camunda:decisionRef="zusatzgebuehr" camunda:mapDecisionResult="singleEntry">
+      <bpmn:incoming>SequenceFlow_12mssqd</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_1x5n8ac</bpmn:outgoing>
+    </bpmn:businessRuleTask>
+    <bpmn:sequenceFlow id="SequenceFlow_1x5n8ac" sourceRef="Task_01rjk2k" targetRef="Task_0r3ldfh" />
+    <bpmn:manualTask id="Task_0r3ldfh" name="LKW beladen">
+      <bpmn:incoming>SequenceFlow_1x5n8ac</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_05nat8n</bpmn:outgoing>
+    </bpmn:manualTask>
+    <bpmn:sequenceFlow id="SequenceFlow_05nat8n" sourceRef="Task_0r3ldfh" targetRef="Task_0c1gji5" />
+    <bpmn:manualTask id="Task_0c1gji5" name="Waren liefern">
+      <bpmn:incoming>SequenceFlow_05nat8n</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_1yybrxv</bpmn:outgoing>
+    </bpmn:manualTask>
+    <bpmn:endEvent id="EndEvent_1tu92o5" name="Auftrag beendet">
+      <bpmn:incoming>SequenceFlow_1bgpf5d</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sendTask id="Task_14mr355" name="Auftragsabschluss versenden">
+      <bpmn:extensionElements>
+        <camunda:connector>
+          <camunda:inputOutput>
+            <camunda:inputParameter name="to">${email}</camunda:inputParameter>
+            <camunda:inputParameter name="subject">Ihr Auftrag wurde erfolgreich abgeschlossen.</camunda:inputParameter>
+            <camunda:inputParameter name="fileNames" />
+            <camunda:inputParameter name="text">Der Auftrag der Ware ${ware} mit der Menge ${menge} sowie dem Gewicht von ${gewicht}kg ist erfolgreich abgeschlossen. Dafür werden Versandkosten in Höhe von ${versandkosten}€ und zusätzliche Gebühren in Höhe von ${zusatzgebuehr}€ fällig. Priorität: ${prioritaet}. Die Zahlungsaufforderung erhalten sie von Klarna.</camunda:inputParameter>
+          </camunda:inputOutput>
+          <camunda:connectorId>mail-send</camunda:connectorId>
+        </camunda:connector>
+      </bpmn:extensionElements>
+      <bpmn:incoming>SequenceFlow_0dnud0f</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_1bgpf5d</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:serviceTask id="Task_0i2tvmn" name="Rechnung übertragen" camunda:type="external" camunda:topic="rechnung">
+      <bpmn:incoming>SequenceFlow_1yybrxv</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_0dnud0f</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="SequenceFlow_1yybrxv" sourceRef="Task_0c1gji5" targetRef="Task_0i2tvmn" />
+    <bpmn:sequenceFlow id="SequenceFlow_0dnud0f" sourceRef="Task_0i2tvmn" targetRef="Task_14mr355" />
+    <bpmn:sequenceFlow id="SequenceFlow_1bgpf5d" sourceRef="Task_14mr355" targetRef="EndEvent_1tu92o5" />
+    <bpmn:userTask id="Task_16icuop" name="Lieferdaten eintragen" camunda:assignee="demo">
+      <bpmn:extensionElements>
+        <camunda:formData>
+          <camunda:formField id="ware" label="Ware" type="string" />
+          <camunda:formField id="menge" label="Menge" type="long" />
+          <camunda:formField id="gewicht" label="Gewicht" type="long" />
+          <camunda:formField id="versandkosten" label="Versandkosten" type="long" />
+          <camunda:formField id="gefahrentransport" label="Gefahrentransport?" type="boolean" />
+          <camunda:formField id="prioritaet" label="Prioritaet" type="string" defaultValue="Standard" />
+          <camunda:formField id="email" label="E-Mail-Adresse des Kunden" type="string" />
+        </camunda:formData>
+      </bpmn:extensionElements>
+      <bpmn:incoming>SequenceFlow_1n6fdtl</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_12mssqd</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:association id="Association_0v32lku" sourceRef="Task_0i2tvmn" targetRef="TextAnnotation_0jn1dn8" />
+    <bpmn:textAnnotation id="TextAnnotation_0jn1dn8">
+      <bpmn:text>an Klarna</bpmn:text>
+    </bpmn:textAnnotation>
+  </bpmn:process>
+  <bpmn:message id="Message_15lo3sw" name="Message_0pa31pf" />
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_0yhoahg">
+      <bpmndi:BPMNShape id="Participant_0jtecfm_di" bpmnElement="Participant_0jtecfm">
+        <dc:Bounds x="119" y="267" width="1183" height="235" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="StartEvent_1nzyqvr_di" bpmnElement="StartEvent_1">
+        <dc:Bounds x="180" y="382" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="166" y="425" width="64" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Participant_1iemwyv_di" bpmnElement="Participant_09hns3e">
+        <dc:Bounds x="119" y="169" width="1182" height="61" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="MessageFlow_1fpdncz_di" bpmnElement="MessageFlow_1fpdncz">
+        <di:waypoint x="198" y="230" />
+        <di:waypoint x="198" y="382" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1n6fdtl_di" bpmnElement="SequenceFlow_1n6fdtl">
+        <di:waypoint x="216" y="400" />
+        <di:waypoint x="266" y="400" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="UserTask_0528f91_di" bpmnElement="Task_16icuop">
+        <dc:Bounds x="266" y="360" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_12mssqd_di" bpmnElement="SequenceFlow_12mssqd">
+        <di:waypoint x="366" y="400" />
+        <di:waypoint x="416" y="400" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="BusinessRuleTask_1c68ft6_di" bpmnElement="Task_01rjk2k">
+        <dc:Bounds x="416" y="360" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1x5n8ac_di" bpmnElement="SequenceFlow_1x5n8ac">
+        <di:waypoint x="516" y="400" />
+        <di:waypoint x="566" y="400" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ManualTask_151whd0_di" bpmnElement="Task_0r3ldfh">
+        <dc:Bounds x="566" y="360" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_05nat8n_di" bpmnElement="SequenceFlow_05nat8n">
+        <di:waypoint x="666" y="400" />
+        <di:waypoint x="716" y="400" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ManualTask_0hpt3y8_di" bpmnElement="Task_0c1gji5">
+        <dc:Bounds x="716" y="360" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="TextAnnotation_0jn1dn8_di" bpmnElement="TextAnnotation_0jn1dn8">
+        <dc:Bounds x="866" y="300" width="100" height="30" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Association_0v32lku_di" bpmnElement="Association_0v32lku">
+        <di:waypoint x="916" y="360" />
+        <di:waypoint x="916" y="330" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ServiceTask_055gugt_di" bpmnElement="Task_0i2tvmn">
+        <dc:Bounds x="866" y="360" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask_1x9of4p_di" bpmnElement="Task_14mr355">
+        <dc:Bounds x="1016" y="360" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_1tu92o5_di" bpmnElement="EndEvent_1tu92o5">
+        <dc:Bounds x="1166" y="382" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1145" y="425" width="79" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="MessageFlow_1v9cbb7_di" bpmnElement="MessageFlow_1v9cbb7">
+        <di:waypoint x="1066" y="360" />
+        <di:waypoint x="1066" y="230" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1yybrxv_di" bpmnElement="SequenceFlow_1yybrxv">
+        <di:waypoint x="816" y="400" />
+        <di:waypoint x="866" y="400" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_0dnud0f_di" bpmnElement="SequenceFlow_0dnud0f">
+        <di:waypoint x="966" y="400" />
+        <di:waypoint x="1016" y="400" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1bgpf5d_di" bpmnElement="SequenceFlow_1bgpf5d">
+        <di:waypoint x="1116" y="400" />
+        <di:waypoint x="1166" y="400" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

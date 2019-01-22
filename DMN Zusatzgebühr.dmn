@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/DMN/20151101/dmn.xsd" xmlns:camunda="http://camunda.org/schema/1.0/dmn" id="Definitions_0lz3lku" name="DRD" namespace="http://camunda.org/schema/1.0/dmn">
+  <decision id="zusatzgebuehr" name="Zusatzgebuehr ermitteln">
+    <decisionTable id="decisionTable_1">
+      <input id="input_1" label="Gefahrentransport" camunda:inputVariable="G">
+        <inputExpression id="inputExpression_1" typeRef="boolean">
+          <text>gefahrentransport</text>
+        </inputExpression>
+      </input>
+      <input id="InputClause_0zjvkoh" label="Gewicht" camunda:inputVariable="m">
+        <inputExpression id="LiteralExpression_0d0dsoz" typeRef="double">
+          <text>gewicht</text>
+        </inputExpression>
+      </input>
+      <input id="InputClause_0enu0a5" label="Prioritaet" camunda:inputVariable="P">
+        <inputExpression id="LiteralExpression_045ttr8" typeRef="string">
+          <text>prioritaet</text>
+        </inputExpression>
+        <inputValues id="UnaryTests_03j57it">
+          <text>"Standard","Express"</text>
+        </inputValues>
+      </input>
+      <output id="output_1" label="Zusatzgebuehr" name="Zusatzgebuehr" typeRef="integer" />
+      <rule id="DecisionRule_05ciwpq">
+        <description>in €</description>
+        <inputEntry id="UnaryTests_0n0cd0j">
+          <text>false</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_078j3ki">
+          <text>-</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0741ax0">
+          <text>"Standard"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1lyeeta">
+          <text>0</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_1ohcj8y">
+        <description>in €</description>
+        <inputEntry id="UnaryTests_1oaagmj">
+          <text>false</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_06qaw7d">
+          <text>-</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_07hobqp">
+          <text>"Express"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0voosqp">
+          <text>25</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_1x15o8n">
+        <description>in €</description>
+        <inputEntry id="UnaryTests_03py7vc">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0nmj2a7">
+          <text>&lt;=1000</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1jtjwkq">
+          <text>"Standard"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1awmkz2">
+          <text>250</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_1letn2q">
+        <description>in €</description>
+        <inputEntry id="UnaryTests_1egbjk3">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1mksmjz">
+          <text>&gt;1000</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0hu50xz">
+          <text>"Standard"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1ulwqm5">
+          <text>500</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_05dyzd6">
+        <description>in €</description>
+        <inputEntry id="UnaryTests_0kjeglu">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1t2px8s">
+          <text>-</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1vi0q8n">
+          <text>"Express"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_11hf67x">
+          <text>1000</text>
+        </outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>
